@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  eureka-server:
+    build:
+      context: ./Eureka_server
+      dockerfile: Dockerfile-eureka
+    ports:
+      - "8761:8761"
+
+  gateway:
+    build:
+      context: ./Gateway
+      dockerfile: Dockerfile-gateway
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+
+  service-client:
+    build:
+      context: ./Client
+      dockerfile: Dockerfile-service-client
+    ports:
+      - "8088:8088"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+
+  service-voiture:
+    build:
+      context: ./Voiture
+      dockerfile: Dockerfile-service-voiture
+    ports:
+      - "8089:8089"
+    depends_on:
+      - eureka-server
+      - service-client
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
